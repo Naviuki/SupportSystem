@@ -1,0 +1,13 @@
+﻿// NotificationModule/Services/NotificationService.cs
+public NotificationResponse Send(NotificationRequest request)
+{
+    // Операторы техподдержки (реальные email)
+    var operators = new[] { "support1@company.com", "support2@company.com" };
+
+    foreach (var op in operators)
+    {
+        Console.WriteLine($"🚨 ОПЕРАТОРУ {op}: Новая заявка #{request.TicketId}");
+    }
+
+    return new(true, $"Уведомлено {operators.Length} операторов");
+}
