@@ -13,25 +13,30 @@
         }
 
         .operator-header {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
         }
 
         .ticket-card {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 15px;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
             .ticket-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             }
 
         .status-new {
             background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(45deg, #10b981, #059669);
             color: white;
         }
 
@@ -124,7 +129,7 @@
                             <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h5 class="card-title mb-0 fw-bold">${ticket.title}</h5>
-                                    <span class="badge status-new fs-6 px-3 py-2 rounded-pill fw-semibold">
+                                    <span class="badge ${ticket.status === 'New' ? 'status-new' : ticket.status === 'Completed' ? 'status-completed' : 'status-deleted'} fs-6 px-3 py-2 rounded-pill fw-semibold">
                                         ${ticket.status}
                                     </span>
                                 </div>
@@ -143,9 +148,13 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
+                                    <button class="btn btn-success" onclick="completeTicket(${ticket.id})">
+                                        <i class="fas fa-check me-2"></i>
+                                        Выполнено
+                                    </button>
                                     <button class="btn btn-danger" onclick="deleteTicket(${ticket.id})">
                                         <i class="fas fa-trash me-2"></i>
-                                        Удалить заявку #${ticket.id}
+                                        Удалить #${ticket.id}
                                     </button>
                                 </div>
                             </div>
@@ -165,6 +174,30 @@
             }
         }
 
+        // ✅ ВЫПОЛНЕНИЕ ЗАЯВКИ
+        async function completeTicket(id) {
+            if (!confirm(`✅ Вы уверены, что заявка #${id} выполнена?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/tickets/${id}/complete`, {
+                    method: 'PATCH'
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showToast(`✅ ${result.message}`, 'success');
+                    loadTickets(); // Обновляем список
+                } else {
+                    showToast(`❌ ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showToast(`❌ Ошибка сети: ${error.message}`, 'danger');
+            }
+        }
+
         // ✅ УДАЛЕНИЕ ЗАЯВКИ
         async function deleteTicket(id) {
             if (!confirm(`🗑️ Вы уверены, что хотите удалить заявку #${id}?`)) {
@@ -179,7 +212,6 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    // Успешное удаление с анимацией
                     showToast(`✅ ${result.message}`, 'success');
                     loadTickets(); // Обновляем список
                 } else {
