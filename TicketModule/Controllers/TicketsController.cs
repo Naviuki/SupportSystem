@@ -38,7 +38,7 @@ public class TicketsController : ControllerBase
     }
 
     // DELETE api/tickets/{id}
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
         var success = _ticketService.DeleteTicket(id);
@@ -46,6 +46,18 @@ public class TicketsController : ControllerBase
             return Ok(new { success = true, message = $"Заявка #{id} удалена" });
         else
             return NotFound(new { success = false, message = $"Заявка #{id} не найдена" });
+    }
+
+    // PATCH api/tickets/{id}/complete ✅ НОВЫЙ ENDPOINT
+    [HttpPatch("{id:int}/complete")]
+    public async Task<IActionResult> CompleteTicket(int id)
+    {
+        var result = await _ticketService.CompleteTicketAsync(id);
+
+        if (result.Success)
+            return Ok(new { success = true, message = result.Message });
+        else
+            return NotFound(new { success = false, message = result.Message });
     }
 
     // GET /api/tickets

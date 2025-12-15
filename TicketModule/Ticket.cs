@@ -8,5 +8,6 @@ public class Ticket
     public string Description { get; set; } = "";
     public string UserEmail { get; set; } = "";
     public string Status { get; set; } = "New";
+    public DateTime? UpdatedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

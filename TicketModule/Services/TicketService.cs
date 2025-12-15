@@ -47,21 +47,43 @@ public class TicketService
         return _tickets.TryRemove(id, out _);
     }
 
-    // возвращаем List<object>
+    // ✅ НОВЫЙ МЕТОД - завершение заявки
+    public async Task<TicketResponse> CompleteTicketAsync(int id)
+    {
+        if (_tickets.TryGetValue(id, out var ticket))
+        {
+            ticket.Status = "Completed";
+            Console.WriteLine($"[TICKET #{id}] COMPLETED");
+            return new TicketResponse
+            {
+                Success = true,
+                Message = $"Заявка #{id} выполнена",
+                TicketId = id
+            };
+        }
+
+        return new TicketResponse
+        {
+            Success = false,
+            Message = "Заявка не найдена"
+        };
+    }
+
+    // возвращаем List
     public List<object> GetAllTickets()
     {
         return _tickets.Values
             .OrderBy(t => t.CreatedAt)
-            .Select(t => new object[] {
-                new {
-                    id = t.Id,
-                    title = t.Title,
-                    description = t.Description,
-                    userEmail = t.UserEmail,
-                    status = t.Status,
-                    createdAt = t.CreatedAt
-                }
-            }.First())
+            .Select(t => new
+            {
+                id = t.Id,
+                title = t.Title,
+                description = t.Description,
+                userEmail = t.UserEmail,
+                status = t.Status,
+                createdAt = t.CreatedAt
+            })
+            .Cast<object>()
             .ToList();
     }
 }
@@ -72,6 +94,6 @@ public class Ticket
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
     public string UserEmail { get; set; } = "";
-    public string Status { get; set; } = "";
+    public string Status { get; set; } = "New";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
